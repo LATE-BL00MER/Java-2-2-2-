@@ -1,28 +1,26 @@
 package Hw_6_12;
 
-import java.util.Random;
 import java.util.Scanner;
 
 public class NumberExpectationGame {
     private final Scanner scanner = new Scanner(System.in);
-    private final Random rand = new Random();
 
     private Player[] players;
     private int[] randomNumbers = new int[15];
     private boolean isGameRunning = true;
 
     public void run() {
-        initializePlayer();
+        initializePlayers();
         getPlayerChoices();
 
         while (isGameRunning) {
             generateRandomNumbers();
             checkPlayerChoices();
-            removeWinner();
+            removeWinners();
         }
     }
 
-    public void initializePlayer() {
+    public void initializePlayers() {
         System.out.print("게임에 참여할 선수들 이름>>");
         String[] playerNames = scanner.nextLine().split(" ");
 
@@ -38,7 +36,6 @@ public class NumberExpectationGame {
             int choice = Integer.parseInt(scanner.nextLine());
             player.setCurrentNumber(choice);
         }
-
     }
 
     private void generateRandomNumbers() {
@@ -47,7 +44,7 @@ public class NumberExpectationGame {
         scanner.nextLine();
 
         for (int i = 0; i < randomNumbers.length; i++) {
-            randomNumbers[i] = rand.nextInt(1, 11);
+            randomNumbers[i] = (int)(Math.random() * 10) + 1;
             System.out.print(randomNumbers[i] + " ");
         }
         System.out.println();
@@ -55,19 +52,18 @@ public class NumberExpectationGame {
 
     private void checkPlayerChoices() {
         for (Player player : players) {
-            int count = 0;
-            for (int n : randomNumbers) {
-                if (n == player.getCurrentNumber()) {
-                    count++;
+            int matchCount = 0;
+            for (int num : randomNumbers) {
+                if (num == player.getCurrentNumber()) {
+                    matchCount++;
                 }
             }
-
-            player.addScore(count);
-            System.out.printf("[%s] 맞춘 개수: %d]\n", player.getName(), player.getScore());
+            player.addScore(matchCount);
+            System.out.printf("[%s] 맞춘 개수: %d\n", player.getName(), player.getScore());
         }
     }
 
-    private void removeWinner() {
+    private void removeWinners() {
         int minScore = players[0].getScore();
         for (Player player : players) {
             if (player.getScore() < minScore) {
@@ -75,30 +71,28 @@ public class NumberExpectationGame {
             }
         }
 
-        // 최저 점수를 가진 사람들만을 담을 배열 만들기
-        int minScoreCount = 0;
+        int loserCount = 0;
         for (Player player : players) {
             if (player.getScore() == minScore) {
-                minScoreCount++;
+                loserCount++;
             }
         }
 
-        Player[] losers = new Player[minScoreCount];
+        Player[] nextRoundPlayers = new Player[loserCount];
         int index = 0;
 
-        // 4. 최저 점수 가진 사람들을 새로운 배열에 옮기기
         System.out.print("현재 패자들 : ");
         for (Player player : players) {
             if (player.getScore() == minScore) {
-                losers[index++] = player;
+                nextRoundPlayers[index++] = player;
                 System.out.print(player.getName() + " ");
             }
         }
+        System.out.println();
 
-        this.players = losers;
+        this.players = nextRoundPlayers;
 
         if (players.length == 1) {
-            System.out.println();
             System.out.printf("최종 패자는 %s 입니다.\n", players[0].getName());
             isGameRunning = false;
         }
